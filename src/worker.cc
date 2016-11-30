@@ -255,11 +255,13 @@ class RejectedClient {
 
     template<class S>
     UvError AcceptAndReject(TcpWrap<S>* server) {
-      UvError err = conn_.AcceptFromServer(server);
-      if (err) goto error;
 
       static char response[] =
         "{\"error\": \"Another client is already connected.\"}\r\n";
+
+      UvError err = conn_.AcceptFromServer(server);
+      if (err) goto error;
+
       write_chunk_ = uv_buf_init(response, ArraySize(response)-1);
 
       write_req_.data = this;
