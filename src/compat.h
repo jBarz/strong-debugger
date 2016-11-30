@@ -37,6 +37,17 @@ const char* UvStrError(int res, uv_loop_t* loop);
 #define FullMemoryBarrier() __sync_synchronize()
 #endif
 
+#ifdef __MVS__
+inline bool __sync_synchronize() {
+  // Use this pragma around the asm string to counteract -qascii option to xlc.
+# pragma convert("ibm-1047")
+  // Emit a "bcr 14,0" instruction to acheive serialization of the CPU.
+  __asm__ __volatile__(" bcr 14,0");
+# pragma convert(pop)
+  return true;
+}
+#endif
+
 class AtomicBool {
   public:
     explicit inline AtomicBool(bool value) : value_(value) {}
